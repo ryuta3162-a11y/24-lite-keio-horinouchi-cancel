@@ -78,7 +78,7 @@
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyOqBu2txTi9B4u8Hz1dTuJ6k3PZqVHN9z8P6OIyf9kZMvvLIUPrLNRlhyBg_8zqzoK/exec"; 
 
     // --- 退会理由リストデータ (ユーザー提供の画像に基づき更新) ---
-    // label の値は、スプレッドシートのヘッダーと一致させてください
+    // label の値が、スプレッドシートのヘッダーと完全に一致する必要があります
     const REASON_OPTIONS = [
       { id: "R01", label: "体調不良、入院、ケガ、病気" },
       { id: "R02", label: "看病、家事、育児" },
@@ -126,7 +126,7 @@
       const [formData, setFormData] = useState({
         name: '',
         memberId: '',
-        reason: [] // この配列には、ID (R01, M01など) が格納される
+        reason: [] // この配列には、日本語のラベルが格納される
       });
       const [status, setStatus] = useState('idle');
       const [errorMessage, setErrorMessage] = useState('');
@@ -140,7 +140,7 @@
       };
       
       const handleReasonChange = (e) => {
-        // ★ 修正点: value には option.id が入るようになった ★
+        // ★ 修正点: value には option.label (日本語) が入るようになった ★
         const { value, checked } = e.target;
         setFormData(prev => {
           if (checked) {
@@ -166,7 +166,7 @@
         const params = new URLSearchParams();
         params.append('name', formData.name);
         params.append('memberId', formData.memberId);
-        // 理由配列をカンマ区切りの文字列に変換して送る (R01,M01,...)
+        // 理由配列をカンマ区切りの文字列に変換して送る (日本語ラベル,日本語ラベル,...)
         params.append('reason', formData.reason.join(','));
 
         try {
@@ -189,12 +189,6 @@
 
       // 完了画面
       if (status === 'success') {
-        // 表示用にIDからラベルに戻すためのロジック
-        const selectedLabels = formData.reason.map(id => {
-          const option = REASON_OPTIONS.find(opt => opt.id === id);
-          return option ? option.label : id;
-        });
-
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center border-t-4 border-red-600">
@@ -211,7 +205,8 @@
                 <p className="font-bold mb-2 text-lg">送信内容確認</p>
                 <p>お名前: {formData.name}</p>
                 <p>会員番号: {formData.memberId}</p>
-                <p className="mt-2 text-sm text-gray-600">退会理由: {selectedLabels.join(', ') || '理由未選択'}</p>
+                {/* 理由配列は既に日本語ラベルなのでそのまま表示 */}
+                <p className="mt-2 text-sm text-gray-600">退会理由: {formData.reason.join(', ') || '理由未選択'}</p>
               </div>
               <p className="mt-8 text-xs text-gray-400">
                 長らくのご愛顧誠にありがとうございました
@@ -328,12 +323,12 @@
                   {REASON_OPTIONS.map((option) => (
                     <div key={option.id} className="mb-2 last:mb-0">
                       <label className="flex items-center p-2 cursor-pointer hover:bg-red-100 rounded-md transition-colors text-base font-medium text-gray-800">
-                        {/* ★ 修正点: valueを label から id に変更 ★ */}
+                        {/* ★ 修正点: valueを id から label (日本語) に戻す ★ */}
                         <input
                           type="checkbox"
                           name="reason"
-                          value={option.id} 
-                          checked={formData.reason.includes(option.id)}
+                          value={option.label} 
+                          checked={formData.reason.includes(option.label)}
                           onChange={handleReasonChange}
                           className="form-checkbox border-red-600 text-red-600 focus:ring-red-500"
                         />
