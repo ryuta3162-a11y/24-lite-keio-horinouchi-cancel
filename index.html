@@ -73,11 +73,11 @@
 
     // ==========================================
     // 【設定】GASの「ウェブアプリURL」
-    // ★ いただいた最新URLを埋め込み済み ★
+    // ★ 最新のデプロイURLに変更済み ★
     // ==========================================
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyOqBu2txTi9B4u8Hz1dTuJ6k3PZqVHN9z8P6OIyf9kZMvvLIUPrLNRlhyBg_8zqzoK/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw4czgxlkNfcxUR4Fqkc74oOi-5-Jt-M0H0WOzUtyDSSlLhOdW3sw5i_9dLwO2LttJYvQ/exec"; 
 
-    // --- 退会理由リストデータ (ユーザー提供の画像に基づき更新) ---
+    // --- 退会理由リストデータ ---
     // label の値が、スプレッドシートのヘッダーと完全に一致する必要があります
     const REASON_OPTIONS = [
       { id: "R01", label: "体調不良、入院、ケガ、病気" },
@@ -126,7 +126,7 @@
       const [formData, setFormData] = useState({
         name: '',
         memberId: '',
-        reason: [] // この配列には、日本語のラベルが格納される
+        reason: [] // 日本語ラベルが格納されます
       });
       const [status, setStatus] = useState('idle');
       const [errorMessage, setErrorMessage] = useState('');
@@ -140,7 +140,7 @@
       };
       
       const handleReasonChange = (e) => {
-        // ★ 修正点: value には option.label (日本語) が入るようになった ★
+        // GAS側で日本語ヘッダーと照合するため、label(日本語)を使用
         const { value, checked } = e.target;
         setFormData(prev => {
           if (checked) {
@@ -166,7 +166,7 @@
         const params = new URLSearchParams();
         params.append('name', formData.name);
         params.append('memberId', formData.memberId);
-        // 理由配列をカンマ区切りの文字列に変換して送る (日本語ラベル,日本語ラベル,...)
+        // 理由配列をカンマ区切りの文字列に変換して送る
         params.append('reason', formData.reason.join(','));
 
         try {
@@ -205,7 +205,6 @@
                 <p className="font-bold mb-2 text-lg">送信内容確認</p>
                 <p>お名前: {formData.name}</p>
                 <p>会員番号: {formData.memberId}</p>
-                {/* 理由配列は既に日本語ラベルなのでそのまま表示 */}
                 <p className="mt-2 text-sm text-gray-600">退会理由: {formData.reason.join(', ') || '理由未選択'}</p>
               </div>
               <p className="mt-8 text-xs text-gray-400">
@@ -236,6 +235,7 @@
               <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center border-b pb-4">
                 退会申請フォーム
               </h2>
+              {/* 重要事項: 句読点なし・改行調整済み */}
               <p className="text-red-700 font-bold text-base leading-relaxed mb-4">
                 <span className="text-black">【重要】</span>通常会員は<span className="underline">当月末解約</span><br />
                 法人会員は<span className="underline">翌月末解約</span>となります
@@ -323,11 +323,11 @@
                   {REASON_OPTIONS.map((option) => (
                     <div key={option.id} className="mb-2 last:mb-0">
                       <label className="flex items-center p-2 cursor-pointer hover:bg-red-100 rounded-md transition-colors text-base font-medium text-gray-800">
-                        {/* ★ 修正点: valueを id から label (日本語) に戻す ★ */}
+                        {/* 重要: valueには日本語ラベルを設定 */}
                         <input
                           type="checkbox"
                           name="reason"
-                          value={option.label} 
+                          value={option.label}
                           checked={formData.reason.includes(option.label)}
                           onChange={handleReasonChange}
                           className="form-checkbox border-red-600 text-red-600 focus:ring-red-500"
